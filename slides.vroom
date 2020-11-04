@@ -1,0 +1,167 @@
+---- config
+# Basic config options.
+title: Programming in Bash
+indent: 5
+auto_size: 1
+vim_opts: '-u NONE'
+skip: 0
+vimrc: |
+  set nohlsearch
+
+  map q ;
+  map qq :q!<cr>
+
+  map t gg0
+  map j }+
+  map k {{+
+  map <enter> :exec '!./run ' . @% . ' ' . line(".")<cr>
+
+---- center
+Program in Bash
+
+by Ingy döt Net
+
+November, 2020
+
+----
+== Running code in various languages
+
+$ for i in {1..10}; do echo "bash 1-line> $i"; done
+
+$ for i in {1..10}; do
+>   echo "bash multi> $i"
+> done
+
+# bash:
+for i in {1..10}; do
+  echo "bash> $i"
+done
+
+# perl:
+for my $i (1..10) {
+  say "perl> $i";
+}
+
+# python:
+for i in range(1, 10):
+  print("python> %d" % i)
+
+# ruby:
+(1..10).each do |i|
+  puts "ruby> #{i}"
+end
+
+# node:
+for (i = j = 1; j <= 10; i = ++j) {
+  console.log(`node> ${i}`);
+}
+
+# coffee:
+for i in [1..10]
+  console.log "coffee> #{i}"
+----
+== Ingy and Acmeism
+
+* Publishing ideas across borders
+* My programming philosophy
+* Programs are just ideas
+* Languages are borders
+
+----
+== 
+
+* I like working in all programming languages
+  * Inline.pm
+  * ActiveState
+  * YAML
+
+----
+== My goto Languages
+
+* Bash -- Ready and Able
+* CoffeeScript -- Best clean syntax. NodeJS / Browser.
+* Perl (Ruby, Python) -- Whipuptitude
+* Haskell -- Funced Up
+
+----
+== 
++* Publishing "Modules" in all languages
+  * CPAN, 6PAN, PyPI, RubyGems, NPM, etc
++* Publishing the same module in many langs at once
+  * Acmeism
+  * My programming philosophy
+  * http://acmeism.org
++* I like inventing new languages:
+  * YAML
+  * Jemplate
+  * Pegex
+  * TestML
+  * SchemaType
+  * Lingy
+
+----
+
+- Make a multiline runner
+- Make an idioms spreadsheet
+
+- git-subrepo
+- git-hub
+
+- bpan
+  - bashplus
+  - test-more-bash
+  - getopt-bash
+  - json-bash
+
+
+- history of shell, bash, perl
+- man bash
+- shellcheck
+- stackoverflow
+- shell, terminal, window-manager
+- interactive shell vs shell programming
+- programs, builtins, functions, aliases
+- type, which, command
+- macOS and Bash 3.2
+- shopt and set
+- if statements
+- test, [, [[
+- && ||
+- $?
+- return, exit
+- prove/perl and bash shebang
+- the power of parens (...)
+- the power of a pipe
+- expressions and statements
+- semicolons
+- parsing and words
+- IFS
+- functions
+  - foo() (:)
+- local variables
+- all names are global
+- set vs env
+- variable expansion
+  - $foo == ${foo}
+  - ${foo:-...} ${foo:=...} ${#foo} ${foo//x/y}
+- {1..10}
+- looping
+
+
+----
+== The End
+
+== Questions??
+
+----
+=== What's under the Shell?
+
+* At an abstract level, a computer:
+  * Has a cpu, memory, and is connected to devices
+
+=== The importance of Shell Scripting
+
+* A terminal (emulator) is a GUI program that runs a program called a shell
+
+
+* History of shell, sed, awk, perl, bash

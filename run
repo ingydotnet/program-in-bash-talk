@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+set -e -u -o pipefail
+
+file=$1 line=$2
+code=$(
+  perl -e '
+    $n = shift(@ARGV);
+    $i = 0;
+    $code = "";
+    $found = 0;
+    while ($l = <>) {
+      $code .= $l;
+      $found = 1 if ++$i >= $n;
+      if ($l !~ /\S/) {
+        if ($found) {
+          $code =~ s/\n+\z/\n/;
+          print $code;
+          exit 0;
+        }
+        $code = "";
+      }
+    }
+    print $code;
+  ' "$line" < "$file"
+)
+
+code=$(echo "$code" | perl -pe 's/^     //gm')
+
+if [[ $code == \$* ]]; then
+  echo "$code" | perl -pe 's/^[\$\>]\ //m' | bash -
+
+elif [[ $code == \#\ bash* ]]; then
+  echo "$code" | bash -
+
+elif [[ $code == \#\ perl* ]]; then
+  echo "$code" | perl -Mv5.12 -
+
+elif [[ $code == \#\ python* ]]; then
+  echo "$code" | python -
+
+elif [[ $code == \#\ ruby* ]]; then
+  echo "$code" | ruby -
+
+elif [[ $code == \#\ node* ]]; then
+  echo "${code/#/\/\/}" > code.js
+  node code.js
+
+elif [[ $code == \#\ coffee* ]]; then
+  echo "$code" > run.coffee
+  coffee run.coffee
+
+fi
