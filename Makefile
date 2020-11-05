@@ -1,6 +1,8 @@
+s ?= 1
+
 .PHONY: run
 run:
-	vroom vroom
+	vroom vroom --skip=$$(($s - 1))
 
 clean:
 	vroom $@

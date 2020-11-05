@@ -2,8 +2,20 @@
 
 set -e -u -o pipefail
 
-file=$1 line=$2
+clear
+
+file=$1 line=$2 flags=${3-}
+
+all=false errexit=false xtrace=false
+bash=false coffee=false js=false node=false perl=false python=false ruby=false
+
+for flag in ${flags//,/ }; do
+  var=${flag#--}
+  printf -v "$var" true
+done
+
 code=$(
+  cat "$file" |
   perl -e '
     $n = shift(@ARGV);
     $i = 0;
@@ -22,32 +34,70 @@ code=$(
       }
     }
     print $code;
-  ' "$line" < "$file"
+  ' "$line" |
+  perl -pe 's/^\ {4}//gm' |
+  perl -p0e 's/\A\s*(.*?)\s*\z/$1/'
 )
 
-code=$(echo "$code" | perl -pe 's/^     //gm')
+[[ $code ]] || exit 0
 
 if [[ $code == \$* ]]; then
-  echo "$code" | perl -pe 's/^[\$\>]\ //m' | bash -
+  code=$(perl -pe 's/^[\$\>]\ //m' <<< "$code")
+  bash=true
 
-elif [[ $code == \#\ bash* ]]; then
-  echo "$code" | bash -
+elif [[ $code =~ ^\#\ (bash|coffee|js|node|perl|python|ruby) ]]; then
+  var=${BASH_REMATCH[1]}
+  printf -v "$var" true
+  code=$(tail -n+2 <<<"$code")
 
-elif [[ $code == \#\ perl* ]]; then
-  echo "$code" | perl -Mv5.12 -
+else
+  all=true
+  code=$(
+    cat "$file" |
+    perl -pe 's/^\ {4}//gm' |
+    perl -p0e 's/\A\s*(.*?)\s*\z/$1/'
+  )
+  bash=true
+fi
 
-elif [[ $code == \#\ python* ]]; then
-  echo "$code" | python -
+line=$(printf "%.0s-" {1..80})
 
-elif [[ $code == \#\ ruby* ]]; then
-  echo "$code" | ruby -
+if ! $all; then
+  cat <<...
+$line
+$code
+...
+fi
 
-elif [[ $code == \#\ node* ]]; then
-  echo "${code/#/\/\/}" > code.js
-  node code.js
+echo "$line"
 
-elif [[ $code == \#\ coffee* ]]; then
-  echo "$code" > run.coffee
-  coffee run.coffee
+echo "$code" | (
+  if $bash; then
+    if $errexit; then
+      if $xtrace; then
+        bash -e -
+      else
+        bash -ex -
+      fi
+    else
+      bash -
+    fi
+  elif $perl; then perl -Mv5.12 -
+  elif $python; then python -
+  elif $ruby; then ruby -
+  elif $js || $node; then
+    cat > code.js
+    node code.js
+  elif $coffee; then
+    cat > code.coffee
+    coffee code.coffee
+  fi
+)
 
+rc=$?
+
+echo "$line"
+
+if [[ $rc -ne 0 ]]; then
+  echo "exit status -> $rc"
 fi

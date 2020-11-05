@@ -1,41 +1,194 @@
 ---- config
 # Basic config options.
 title: Programming in Bash
-indent: 5
+indent: 4
 auto_size: 1
 vim_opts: '-u NONE'
 skip: 0
 vimrc: |
-  set nohlsearch
+  " Redo some vroom defaults:
+  unmap AA
+  unmap OO
+  unmap RR
+  unmap EE
+  map <SPACE> :wa!<cr>:n<CR>:<CR>gg
+  map <BACKSPACE> :wa!<cr>:N<CR>:<CR>gg
 
+  " Not sure this is working:
+  source ~/.vimrc
+
+  " For slide editing:
+  set nohlsearch
+  set filetype=xxx
+  set shiftwidth=2
+  set softtabstop=2
+  set smartindent
+  set smarttab
+
+  " Slide movement helpers:
   map q ;
   map qq :q!<cr>
-
   map t gg0
   map j }+
   map k {{+
-  map <enter> :exec '!./run ' . @% . ' ' . line(".")<cr>
+
+  " Slide code runners
+  map <enter>     :wa!<cr>:exec '!./run ' . @% . ' ' . line(".")<cr>
+  map \\<enter>   :wa!<cr>:exec '!./run ' . @% . ' ' . line(".") . ' --errexit'<cr>
+  map \\\\<enter> :wa!<cr>:exec '!./run ' . @% . ' ' . line(".") . ' --errexit,--xtrace'<cr>
 
 ---- center
-Program in Bash
+Programming in Bash
 
 by Ingy döt Net
 
 November, 2020
 
+---- .bash
+
+# An Example Bash Program
+
+main() {
+  local x=$1 y=$2
+
+  s=$(add $x $y; echo $?)
+
+  echo "$x + $y = $s"
+
+  if (( x + y != s )); then
+    echo "^^ Whu?!?!"
+  fi
+}
+
+add() {
+  x=$1 y=$2
+  return $(( x + y ))
+}
+
+main 1 1
+main 2 4
+main 123 456
+
+----
+== What is a Shell?
+
+* Bash is a command line "shell"
+* A shell is the user interface to your computer
+* You can make your computer do *anything* with a shell
+* macOS and Windows are also "shells" (gui shells)
+* The "shell" is a wrapper around the OS kernel
+
+----
+== Interactive Shells
+
+* Every programmer has run commands in a terminal
+* A terminal (emulator) is a GUI program that runs:
+  * A default interactive shell
+  * Various curses programs
+* Common interactive shells:
+  * Bourne Shell  sh    Stephen Bourne (Bell Labs 70s)
+  * KornShell     ksh   David Korn
+  * Bash          bash  Bourne Again SHell
+  * Zsh           zsh   Bash compatible
+  * Ash           ash   Almquist Shell
+  * Fish          fish  Friendly Interactive SHell
+* bash, zsh and fish are most common for personal machines
+  * Command history
+  * Command completion
+  * Predictive typing
+* ksh, bash and zsh are POSIX shells
+
+----
+== Shell Scripting
+
+* A script is a file of shell commands that act as a program
+* sh and bash are almost always used
+* Years ago, sh was everywhere
+  * But variants and version features made portability hard
+* These days bash is almost everywhere
+  * Bash should be used for almost all shell scripting
+* A "script"  ==  a "program"
+  * Scripting == Programming
+  * Scripting Language == Programming Language
+
+* Bash is a Programming Language (QED)
+
+----
+== What makes a programming language?
+
+* Executable files
+* Modules
+* Classes / objects
+* Functions
+* Conditional logic
+* Loops
+* Error handling
+* Data structures
+* Variables
+* Scope
+* String manipulation
+* Math
+* Threads
+
+----
+== History of Bash
+
+* sh (1976)
+* csh (1978)
+* grep, sed, awk (1970s)
+  * Data processing in the shell
+* Perl (1987)
+  * Extremely shell influenced
+  * With all the grep, sed, awk features
+* Bash (1989)
+  * Took `=~` from Perl
+
+----
+== What's good about Bash?
+
+* It's on almost every machine alive
+  * Or trivially obtainable
+* No language is better at IPC
+  * Programs that use other programs should be Bash
+* Syntax is often really nice
+  * As in better than Perl
+* Often as good or better than Perl
+* Can be written clean and modular
+* Simple and awesome debugging
+* Great for string/text processing
+* Has regular expressions
+* Lots of cool manipulations on variables
+* Often best choice for integration tests
+  * Works with Perl's `prove`
+
+----
+== What's bad about Bash?
+
+* Syntax is sometimes gross
+  * As in worse than Perl
+* Mediocre data structures
+* No floating point numbers
+* Not extremely fast
+
+----
+== When to use Bash?
+
+* I always ask up front, "Can I do this in Bash?"
+  * Often easiest solution
+* Great for tests and automations
+* Not for production code
+  * Web stuff
+  * Database stuff
+
 ----
 == Running code in various languages
-
-$ for i in {1..10}; do echo "bash 1-line> $i"; done
-
-$ for i in {1..10}; do
->   echo "bash multi> $i"
-> done
 
 # bash:
 for i in {1..10}; do
   echo "bash> $i"
 done
+
+$ for i in {1..10}; do echo "bash (1-liner)> $i"; done
 
 # perl:
 for my $i (1..10) {
@@ -59,51 +212,78 @@ for (i = j = 1; j <= 10; i = ++j) {
 # coffee:
 for i in [1..10]
   console.log "coffee> #{i}"
-----
-== Ingy and Acmeism
-
-* Publishing ideas across borders
-* My programming philosophy
-* Programs are just ideas
-* Languages are borders
 
 ----
-== 
+== Command line basics
 
-* I like working in all programming languages
-  * Inline.pm
-  * ActiveState
-  * YAML
-
-----
-== My goto Languages
-
-* Bash -- Ready and Able
-* CoffeeScript -- Best clean syntax. NodeJS / Browser.
-* Perl (Ruby, Python) -- Whipuptitude
-* Haskell -- Funced Up
+* echo
+* cat
+* cp
+* mv
+* ls
+* find
+* grep
+* type
 
 ----
-== 
-+* Publishing "Modules" in all languages
-  * CPAN, 6PAN, PyPI, RubyGems, NPM, etc
-+* Publishing the same module in many langs at once
-  * Acmeism
-  * My programming philosophy
-  * http://acmeism.org
-+* I like inventing new languages:
-  * YAML
-  * Jemplate
-  * Pegex
-  * TestML
-  * SchemaType
-  * Lingy
+== Bash Syntax
+
+* Bash syntax is both similar and different than Perl, Python etc
+* Lines are split into words
+* Words are expanded and evaluated
+* Strings often don't need quotes
 
 ----
+== Bash Syntax Operators
 
-- Make a multiline runner
-- Make an idioms spreadsheet
+* > >> < |          - Redirections
+* >&2 2>&1 &>       - File handles 0=stdin 1=stdout 2=stderr
+* (...)             - Group and run as subprocess
+* ((...))           - Run math expression
+* `...`             - Run subprocess and return stdout (don't use in code)
+* $(...)            - Run subprocess and return stdout (use this; nestable)
+* $((...))          - Run math and return result
+* [ ... ]           - Conditional test (don't use this form)
+* [[ ... ]]         - Conditional test (always use this)
+* == != =~          - String comparison
+* -eq -ne -gt -ge   - Numeric comparison
+* -e -f -d -z -n    - Various test operators
+* && ||             - And Or
+* & ;               - Statement terminators
 
+----
+== Variable Assignment
+
+# perl:
+my $a = 'foo';
+my $b = "$a bar";
+my ($c, $d) = (42, 45);
+my $e = `echo ok`;
+say for $a, $b, $c, $d, $e;
+
+# bash:
+a=foo
+b="$a bar"
+c=42 d=45
+e=$(echo ok)
+printf "%s\n" $a "$b" $c $d $e
+
+----
+== if Statements
+
+# perl:
+if (-e ".") {
+  system "pwd";
+  system "ls";
+}
+
+# bash:
+if [[ -e . ]]; then
+  pwd
+  ls
+fi
+
+----
 - git-subrepo
 - git-hub
 
@@ -153,15 +333,44 @@ for i in [1..10]
 
 == Questions??
 
-----
-=== What's under the Shell?
+---- skip
+*************** Ingy Stuff for Later
+== Ingy and Acmeism
 
-* At an abstract level, a computer:
-  * Has a cpu, memory, and is connected to devices
+* Publishing ideas across borders
+* My programming philosophy
+* Programs are just ideas
+* Languages are borders
 
-=== The importance of Shell Scripting
+-- --
+== Polyglot
 
-* A terminal (emulator) is a GUI program that runs a program called a shell
+* I like working in all programming languages
+  * Inline.pm
+  * ActiveState
+  * YAML
 
+-- --
+== My goto Languages
 
-* History of shell, sed, awk, perl, bash
+* Bash -- Ready and Able
+* CoffeeScript -- Best clean syntax. NodeJS / Browser.
+* Perl (Ruby, Python) -- Whipuptitude
+* Haskell -- Funced Up
+
+-- --
+== 
++* Publishing "Modules" in all languages
+  * CPAN, 6PAN, PyPI, RubyGems, NPM, etc
++* Publishing the same module in many langs at once
+  * Acmeism
+  * My programming philosophy
+  * http://acmeism.org
++* I like inventing new languages:
+  * YAML
+  * Jemplate
+  * Pegex
+  * TestML
+  * SchemaType
+  * Lingy
+
