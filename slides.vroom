@@ -47,17 +47,21 @@ November, 2020
 ----
 == Ingy and Bash
 
-* I have over 200 CPAN packages
+* I've done quite a bit of programming
+* I love to share solutions with the world
+* I have over 200 dists on CPAN:
 
 $ curl -s https://www.cpan.org/modules/02packages.details.txt | grep '/INGY/'
 
-* Over 600 GitHub repositories
+* Over 600 repositories on GitHub:
 
-$ git hub repos ingydotnet
+$ git hub repos ingydotnet  # git-hub is a tool I wrote in Bash!
 
 * I love making automation and productivity tools
 
-* Learning shell was #1 biggest win for my programming
+* Learning shell is #1 biggest win for my programming productivity
+
++* And it's FUN!
 
 ----
 == Vroom
@@ -150,7 +154,7 @@ main 123 456
   * Scripting == Programming
   * Scripting Language == Programming Language
 
-* Bash is a Programming Language (QED)
+* Therefore... Bash is a Programming Language (QED)
 
 ----
 == Componenets of a Programming Language
@@ -296,6 +300,7 @@ for i in [1..10]
 * Lines are split into words
 * Words are expanded and evaluated
 * Strings often don't need quotes
+* Statements are separated by \n ; &
 
 ----
 == Bash Syntax Operators
@@ -348,6 +353,40 @@ if [[ -e . ]]; then
 fi
 
 ----
+== if Syntax
+
+if <condition-statements>
+then <statements>
+elif <condition-statements>
+then <statements>
+else <statements>
+fi
+
+----
+== if Syntax
+
+# bash:
+if
+  a=1
+  b=2
+  (( a < b ))
+then
+  echo $a
+  echo $b
+else
+  echo nope
+fi
+
+# bash:
+if [[ 1 -lt 2 ]]; then
+  echo ok
+else
+  echo nope
+fi
+
+$ if [[ ingy > 'dot net' ]]; then echo ok; else echo nope; fi
+
+----
 == Conditional expressions
 
 $ false || echo ok
@@ -367,7 +406,7 @@ $ [[ foobar =~ foo.+ ]] && echo ok
 
 # perl:
 my @array = qw<foo bar baz>;
-for (my $i = 0; $i < $@array) {
+for (my $i = 0; $i < @array; $i++) {
   my $name = $array[$i];
   say "Hello ${\ ucfirst $name}";
 }
@@ -375,8 +414,8 @@ for (my $i = 0; $i < $@array) {
 # bash:
 array=(foo bar baz)
 i=0
-while [[ $i -lt ${#array[*]}; do
-  name=array[i]
+while [[ $i -lt ${#array[*]} ]]; do
+  name=${array[$((i++))]}
   echo "Hello ${name^}"
 done
 
@@ -430,7 +469,14 @@ done < file2.txt
 
 $ man bash
 
-* help command
+* Use the 'help' command for builtins
+
+$ type cd
+
+$ man cd
+
+$ help cd | head -n20
+
 * StackOverflow
 * Bash wiki
 
@@ -479,15 +525,46 @@ foo.:bar,baz yo
 
 * One of the most powerful parts of Bash is subshells
 * Anything in parentheses forms a subshell
+* Variables and cwd changes are local to subshell
 
-$ foo=bar; (foo=123; exit 1); echo $?
+# bash:
+foo=bar
+(
+  foo=123
+  exit 1
+  echo huh
+)
+echo $?
+echo $foo
+pwd
+(
+  cd /tmp
+  pwd
+)
+pwd
+----
+== Subshells and IFS
+
+# A lot of stackoverflow examples look like:
+
+# bash:
+list=({a..z})
+OLD_IFS=$IFS
+IFS=+
+echo "${list[*]}"
+IFS=$OLD_IFS
+unset OLD_IFS
+
+# bash:
+list=({a..z})
+(IFS=+; echo "${list[*]}")
 
 ----
 == Pipelines
 
 * A | connect the LHS stdout to the RHS stdin
 
-$ cat /usr/share/dict/words | head -n20 | (read word; echo ${word^}) | tail -r
+$ cat /usr/share/dict/words | head -n20 | (while read word; do echo ${word^^}; done) | tac
 
 * Each command is put into a subshell
 
@@ -516,11 +593,17 @@ $ shopt
 
 $ set -e; echo 111; false; echo 222
 
-$ set -e; foo() ( echo $1 ); foo
+$ set -u; foo() ( echo $1 ); foo
 
-$ set | less
+$ set -u; foo() ( echo ${1-} ); foo
 
-$ env | less
+$ set -u; foo() ( echo ${1:-HELLO!!} ); foo
+
+$ foooo=1; set | less
+
+$ foooo=1; env | less
+
+$ export foooo=1; env | less
 
 ----
 == Variable Scoping
@@ -533,30 +616,114 @@ fun() {
 }
 fun foo 123 "x y"
 
+# bash:
+fun() (
+  one=$1
+  echo "I got $# arguments."
+  echo "They are $(IFS=,; echo "$*")."
+)
+fun foo 123 "x y"
+
 ----
 == Strings
+
+* Bash primarily deals with text and strings
+* Every word without syntax meta characters are strings
+* Quoted or unquoted
+* foo == 'foo' == "foo"
+* Quoted strings can be multi-line
+
+# bash:
+echo "Oh hello
+there!"
 
 ----
 == Strings -- interpolation
 
-----
-== Strings -- expansion
+* Double quoted strings support interpolation
+* But not \ escape expansion by default
+  * That's up to the command to do
 
+# bash:
+echo "foo\nbar\n"
+echo
+printf "foo\nbar\n"
+echo
+echo -e "foo\nbar\n"
+
+----
+== Strings -- heredocs
+
+# bash
+name=John
+cat <<...
+Dear $name,
+_
+Welcome to the USA...
+...
+
+----
+== Strings -- expansions
+
+* Bash has a LOT of string variable expansions
+* They are really useful
+
+# bash:
+path=/foo/bar/baz
+echo ">>${path#/}<<"
+echo ">>${path#/*/}<<"
+echo ">>${path##/*}<<"
+echo ">>${path%/*}<<"
+echo ${#path}
+echo ${path//\//=}
+
+# bash:
+echo foo.{json,yaml,xml,htm{,l}}
+echo mv /some/long/path/file.{text,txt}
 ----
 == Numbers and Math
 
+* Numeric operations happen inside ((...))
+* $ is optional on vars
+* Integer math only
+
+# bash:
+x=5
+echo $(( x++ ))
+(( x = x * 2 ))
+echo $x
+echo $((5/2))
+
 ----
-== Bash Debugging -- set -x -v
+== Bash Debugging -- set -x
 
 $ set -x; for i in {1..5}; do echo $i; done
 
-$ set -x; for i in {1..5}; do echo $i; done
+$ vim run
+
+$ echo ok
 
 ----
 == Bash Debugging -- shellcheck
 
+$ shellcheck run
+
+$ shellcheck -e 2002 run
+
 ----
 == Bash Debugging -- interactive
+
+# bash
+foo=bar
+export bar=42
+bash
+echo $foo
+
+# bash
+debugger() { while read -rp '>>> ' line; do eval "$line"; done; echo; }
+foo=bar
+debugger
+echo $foo
 
 ----
 == Arrays
@@ -578,6 +745,14 @@ say "@array!";
 # bash:
 array=(Hello there world)
 echo "${array[*]}!"
+
+# bash:
+array=(one 2 "la la")
+printf "%s\n" ${array[@]}
+echo
+printf "%s\n" "${array[@]}"
+echo
+printf "%s\n" "${array[*]}"
 
 ----
 == Arrays - length
@@ -609,19 +784,21 @@ echo "${array[*]}!"
 == Arrays -- shift
 
 # perl:
-my @array = 1..10
+my @array = (1..10);
 shift @array;
-say @array;
+say "@array";
 
 # bash:
 Array::shift() {
-  
+  n=$1
+  name="$1[@]"
+  set -- "${!name}"
+  shift
+  IFS=' ' read -r -a $n <<<"$@"
 }
 array=({1..10})
-array=(Array
-
-----
-== Arrays -- join
+Array::shift array
+echo "${array[*]}"
 
 ----
 == Read file into a string
@@ -676,9 +853,9 @@ $ git hub following | grep daoswald
 ----
 == git-hub
 
-$ vim ~/src/git-hub
-
 $ git hub
+
+$ vim ~/src/git-hub
 
 $ git hub repo
 
@@ -701,7 +878,7 @@ $ make -C ~/src/test-more-bash test PROVEOPT=-v
 
 $ vim ~/src/test-more-bash
 
-----
+---- skip
 
 
 - history of shell, bash, perl
@@ -748,8 +925,6 @@ $ vim ~/src/test-more-bash
 
 ----
 == The End
-
-== Questions??
 
 ---- skip
 *************** Ingy Stuff for Later

@@ -15,7 +15,7 @@ for flag in ${flags//,/ }; do
 done
 
 code=$(
-  cat "$file" |
+  cat $file |
   perl -e '
     $n = shift(@ARGV);
     $i = 0;
@@ -71,28 +71,37 @@ fi
 
 echo "$line"
 
-echo "$code" | (
-  if $bash; then
-    if $errexit; then
-      if $xtrace; then
-        bash -e -
-      else
-        bash -ex -
-      fi
+if $bash; then
+  script=code.bash
+  if $errexit; then
+    if $xtrace; then
+      cmd=(bash -e "$script")
     else
-      bash -
+      cmd=(bash -ex "$script")
     fi
-  elif $perl; then perl -Mv5.12 -
-  elif $python; then python -
-  elif $ruby; then ruby -
-  elif $js || $node; then
-    cat > code.js
-    node code.js
-  elif $coffee; then
-    cat > code.coffee
-    coffee code.coffee
+  else
+    cmd=(bash "$script")
   fi
-)
+elif $perl; then
+  script=code.pl
+  cmd=(perl -Mv5.12 "$script")
+elif $python; then
+  script=code.py
+  cmd=(python "$script")
+elif $ruby; then
+  script=code.rb
+  cmd=(ruby "$script")
+elif $js || $node; then
+  script=code.js
+  cmd=(node "$script")
+elif $coffee; then
+  script=code.coffee
+  cmd=(coffee "$script")
+fi
+
+echo "$code" > "$script"
+
+"${cmd[@]}"
 
 rc=$?
 
