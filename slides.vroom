@@ -44,18 +44,57 @@ by Ingy döt Net
 
 November, 2020
 
+----
+== Ingy and Bash
+
+* I have over 200 CPAN packages
+
+$ curl -s https://www.cpan.org/modules/02packages.details.txt | grep '/INGY/'
+
+* Over 600 GitHub repositories
+
+$ git hub repos ingydotnet
+
+* I love making automation and productivity tools
+
+* Learning shell was #1 biggest win for my programming
+
+----
+== Vroom
+
+* SlideShows in Vim
++* On CPAN:
+  * https://metacpan.org/release/Vroom
++* All my presentations since 2008
++* Interactive
+
+$ vim slides.vroom . -O
+
+$ perldoc Vroom
+
+---- skip
+== My favorite things (in computing)
+
+* Perl
+* GNU make
+* Bash
+* vim
+* symlinks
+* scalar/array/hash data model
+
 ---- .bash
 
-# An Example Bash Program
+## An Example Bash Program
 
 main() {
   local x=$1 y=$2
 
-  s=$(add $x $y; echo $?)
+  add $x $y
+  sum=$?
 
-  echo "$x + $y = $s"
+  echo "$x + $y = $sum"
 
-  if (( x + y != s )); then
+  if (( x + y != sum )); then
     echo "^^ Whu?!?!"
   fi
 }
@@ -114,11 +153,11 @@ main 123 456
 * Bash is a Programming Language (QED)
 
 ----
-== What makes a programming language?
+== Componenets of a Programming Language
 
 * Executable files
 * Modules
-* Classes / objects
+* Classes / Objects
 * Functions
 * Conditional logic
 * Loops
@@ -129,11 +168,13 @@ main 123 456
 * String manipulation
 * Math
 * Threads
+* Debugging facilities
 
 ----
 == History of Bash
 
-* sh (1976)
+* Thompson Shell (1971)
+* Bourne Shell (1976)
 * csh (1978)
 * grep, sed, awk (1970s)
   * Data processing in the shell
@@ -142,6 +183,13 @@ main 123 456
   * With all the grep, sed, awk features
 * Bash (1989)
   * Took `=~` from Perl
+
+* Bash is under active development
+  * 5.1-rc2 released Nov 3, 2020 (3 days ago!!!)
+  * 5.0 January 2019
+  * 4.4 September 2016
+  * 4,3 November 2014
+  * 4.2 February 2011
 
 ----
 == What's good about Bash?
@@ -169,12 +217,17 @@ main 123 456
 * Mediocre data structures
 * No floating point numbers
 * Not extremely fast
+* All variables are global
+* Functions are flimsy
+  * No return values
+  * No lexical scopes
+  * No closures
 
 ----
 == When to use Bash?
 
 * I always ask up front, "Can I do this in Bash?"
-  * Often easiest solution
+  * Often the easiest solution
 * Great for tests and automations
 * Not for production code
   * Web stuff
@@ -188,7 +241,7 @@ for i in {1..10}; do
   echo "bash> $i"
 done
 
-$ for i in {1..10}; do echo "bash (1-liner)> $i"; done
+$ for i in {1..10}; do echo "bash> $i"; done
 
 # perl:
 for my $i (1..10) {
@@ -214,16 +267,27 @@ for i in [1..10]
   console.log "coffee> #{i}"
 
 ----
-== Command line basics
+== Common CLI commands
+
+* Some are in PATH, some are Bash builtins
 
 * echo
 * cat
 * cp
 * mv
 * ls
+* env
+* cd
 * find
 * grep
+* rm
+* mkdir
+* pwd
+* date
+* less
+* true, false
 * type
+* sed, awk, perl
 
 ----
 == Bash Syntax
@@ -284,14 +348,360 @@ if [[ -e . ]]; then
 fi
 
 ----
-- git-subrepo
-- git-hub
+== Conditional expressions
 
-- bpan
-  - bashplus
-  - test-more-bash
-  - getopt-bash
-  - json-bash
+$ false || echo ok
+
+$ if true; then echo ok; fi
+
+$ ((1 < 3)) && echo ok
+
+$ [[ -e file.txt ]] && echo ok
+
+$ [[ foobar == *foo* ]] && echo ok
+
+$ [[ foobar =~ foo.+ ]] && echo ok
+
+----
+== for Loops
+
+# perl:
+my @array = qw<foo bar baz>;
+for (my $i = 0; $i < $@array) {
+  my $name = $array[$i];
+  say "Hello ${\ ucfirst $name}";
+}
+
+# bash:
+array=(foo bar baz)
+i=0
+while [[ $i -lt ${#array[*]}; do
+  name=array[i]
+  echo "Hello ${name^}"
+done
+
+# perl:
+my @array = qw<foo bar baz>;
+for my $name (@array) {
+  say "Hello ${\ ucfirst $name}";
+}
+
+# bash:
+array=(foo bar baz)
+for name in ${array[@]}; do
+  echo "Hello ${name^}"
+done
+
+----
+== Ranges
+
+# perl:
+for my $c ('a'..'z') {
+  say $c;
+}
+
+# bash:
+for c in {a..z}; do
+  echo $c
+done
+
+# bash:
+printf "%s\n" {a..z}
+
+----
+== while Loops
+
+# perl:
+open my $fh, 'file2.txt';
+while (my $line = <$fh>) {
+  print ">> $line";
+}
+
+# bash:
+while read line; do
+  echo ">> $line"
+done < file2.txt
+
+
+----
+== Getting Help
+
+* man bash
+
+$ man bash
+
+* help command
+* StackOverflow
+* Bash wiki
+
+----
+== Kinds of Commands
+
+* Shell has a clean abstraction for commands
+* Every command has stdin/stdout/stderr attached
+* Pipelines (`|`) connect commands together
+
+* Commands can be any of:
+  * Programs in $PATH
+  * Bash builtins
+  * User defined functions
+  * Aliases (only in interactive shell)
+  * Subshells
+
+* The `type` builtin gives this info
+* Bash has added many common bin commands as builtins
+* Commands can have weird names:
+  * foo-bar
+  * foo::bar
+  * foo.bar,baz
+
+# bash:
+foo.:bar,baz() { echo ok $1; }
+foo.:bar,baz yo
+
+----
+== Functions
+
+* Functions in shell are named groups of commands
+* They have $@ special stack array
+  * Like Perl's @_
+  * Also $* $# $1 $2 etc
+* `local` is the form of scoping (works like Perl's local)
+* You can return 0-255 from a function
+* No way to "return" a string
+  * You can set a variable to a string
+  * You can print a string to stdout
+* Functions are called as commands
+  * std{in,out,err}
+
+----
+== Subshells
+
+* One of the most powerful parts of Bash is subshells
+* Anything in parentheses forms a subshell
+
+$ foo=bar; (foo=123; exit 1); echo $?
+
+----
+== Pipelines
+
+* A | connect the LHS stdout to the RHS stdin
+
+$ cat /usr/share/dict/words | head -n20 | (read word; echo ${word^}) | tail -r
+
+* Each command is put into a subshell
+
+# bash:
+word() { read word; Word=${word^}; }
+echo hello | word
+echo ">> $word $Word"
+
+# bash:
+shopt -s lastpipe
+word() { read word; Word=${word^}; }
+echo hello | word
+echo ">> $word $Word"
+
+----
+== Settings with set and shopt
+
+* Bash has dozens of settings that effect how it works
+* Different in script than interactive shell
+
+$ set -o
+
+$ shopt
+
+* set -e -u -o pipefail  # like `use strict;` in Perl
+
+$ set -e; echo 111; false; echo 222
+
+$ set -e; foo() ( echo $1 ); foo
+
+$ set | less
+
+$ env | less
+
+----
+== Variable Scoping
+
+# bash:
+fun() {
+  local one=$1
+  echo "I got $# arguments."
+  echo "They are $(IFS=,; echo "$*")."
+}
+fun foo 123 "x y"
+
+----
+== Strings
+
+----
+== Strings -- interpolation
+
+----
+== Strings -- expansion
+
+----
+== Numbers and Math
+
+----
+== Bash Debugging -- set -x -v
+
+$ set -x; for i in {1..5}; do echo $i; done
+
+$ set -x; for i in {1..5}; do echo $i; done
+
+----
+== Bash Debugging -- shellcheck
+
+----
+== Bash Debugging -- interactive
+
+----
+== Arrays
+
+* Using arrays well is critical to good Bash
+* They are not natively nestable
+* Bash also has (single level) hashes
+  * I won't cover them today
+* Some array primitives are good
+  * Many are missing but can be easily emulated
+
+----
+== Arrays - assignment
+
+# perl:
+my @array = ('Hello', 'there', 'world');
+say "@array!";
+
+# bash:
+array=(Hello there world)
+echo "${array[*]}!"
+
+----
+== Arrays - length
+
+# perl:
+my @array = ('Hello', 'there', 'world');
+my $length = @array;
+say $length;
+
+# bash:
+array=(Hello there world)
+length=${#array[*]}
+echo $length
+
+----
+== Arrays - push
+
+# perl:
+my @array = ('Hello', 'there');
+push @array, 'world';
+say "@array!";
+
+# bash:
+array=(Hello there)
+array+=(world)
+echo "${array[*]}!"
+
+----
+== Arrays -- shift
+
+# perl:
+my @array = 1..10
+shift @array;
+say @array;
+
+# bash:
+Array::shift() {
+  
+}
+array=({1..10})
+array=(Array
+
+----
+== Arrays -- join
+
+----
+== Read file into a string
+
+# perl:
+open my $fh, 'file1.txt';
+my $string = do { local $/; <$fh> };
+print $string;
+
+# bash:
+string=$(cat file1.txt)
+echo "$string"
+
+# bash:
+string=$(< file1.txt)
+echo "$string"
+
+----
+== Executables (Scripts) vs Modules
+
+* Perl
+  * Scripts are files with no extension and are executable
+  * Or they end with .pl
+  * Modules are files with .pm extension
+  * They are looked up by the values in @INC
+  * They loaded with `use` or `require`
+
+* Perl
+  * Scripts are files with no extension and are executable
+  * Or they end with .pl
+  * Modules are files with .pm extension
+  * They are looked up by the values in @INC
+  * They loaded with `use` or `require`
+
+----
+== The git-hub command
+
+$ git hub user daoswald
+
+$ git hub user
+
+$ git hub repos
+
+$ git hub repo git-hub
+
+$ git hub repo
+
+$ git hub following | grep daoswald
+
++$ git hub unfollow daoswald  # :-D
+
+----
+== git-hub
+
+$ vim ~/src/git-hub
+
+$ git hub
+
+$ git hub repo
+
+$ git hub repo -v -O
+
+$ git hub repo -J
+
+$ make -C ~/src/git-hub test PROVEOPT=-v
+
+----
+== json-bash
+
+$ make -C ~/src/json-bash test PROVEOPT=-v
+
+$ vim ~/src/json-bash
+
+== test-more-bash
+
+$ make -C ~/src/test-more-bash test PROVEOPT=-v
+
+$ vim ~/src/test-more-bash
+
+----
 
 
 - history of shell, bash, perl
@@ -303,8 +713,6 @@ fi
 - programs, builtins, functions, aliases
 - type, which, command
 - macOS and Bash 3.2
-- shopt and set
-- if statements
 - test, [, [[
 - && ||
 - $?
@@ -326,7 +734,17 @@ fi
   - ${foo:-...} ${foo:=...} ${#foo} ${foo//x/y}
 - {1..10}
 - looping
+- parallel processes
 
+- pipes create subprocesses
+  - shopt -s lastpipe
+- Bash is in active development
+
+- git-subrepo
+- git-hub
+- bpan
+- bashplus
+- getopt-bash
 
 ----
 == The End
